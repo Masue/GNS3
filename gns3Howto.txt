@@ -1,0 +1,121 @@
+#!/bin/bash
+
+#
+#some commands may need sudo, i left them out for clarity
+#
+
+
+
+#install dependencies
+
+apt-get install libpcap-dev uuid-dev libelf-dev cmake
+
+apt-get install python3-setuptools python3-pyqt4 python3-ws4py python3-netifaces python3-zmq python3-tornado
+
+apt-get install gcc flex bison
+
+git clone https://github.com/GNS3/gns3-server/
+git clone https://github.com/GNS3/gns3-gui/
+git clone https://github.com/GNS3/dynamips/
+
+#install dynamips
+
+cd dynamips/
+mkdir build/
+cd build/
+cmake ..
+make
+make install
+
+#install server+gui
+
+cd ../..
+cd gns3-server/
+python3 setup.py install
+
+cd ../
+cd gns3-gui/
+python3 setup.py install
+
+
+#
+#	get iniparser
+#
+
+wget http://ndevilla.free.fr/iniparser/iniparser-3.1.tar.gz
+tar -xvzf iniparser-3.1.tar.gz
+cd iniparser/
+make
+cp libiniparser.* /usr/lib
+cp src/iniparser.h /usr/local/include
+cp src/dictionary.h /usr/local/include
+
+
+#
+#	install iouyap
+#
+
+git clone https://github.com/GNS3/iouyap
+cd iouyap/
+make
+make install
+chmod +x iouyap
+ln -s /usr/bin/iouyap iouyap
+
+
+
+
+#
+#	install vpcs
+#
+git clone https://github.com/GNS3/vpcs
+cd vpcs/
+./mk.sh 32
+ln -s /usr/bin/vpcs vpcs
+chmod +x /usr/bin/vpcs
+
+
+#
+#	install qemu
+#
+
+apt-get install qemu
+
+# make juniper and f5 big ip ready for qemu
+# make .img file from .ova
+
+qemu-img convert -O qcow2 junos-*.vmdk junos-*.img
+qemu-img convert -O qcow2 BIGIP-*.vmdk BIPIP-*.img
+
+
+#
+#	install wireshark
+#
+
+apt-get install wireshark
+
+
+
+#
+#	ASA
+#
+
+# afbeelding hier
+# gebruik de bovenstaande instellingen1
+# input the following options for Kernel command line and additional options
+
+#Kernel command line:
+ide_generic.probe_mask=0x01 ide_core.chs=0.0:980,16,32 auto nousb console=ttyS0,9600 bigphysarea=65536 ide1=noprobe no-hlt -net nic
+
+#additional options:
+-vnc none -vga none -m 1024 -icount auto -hdachs 980,16,32
+
+
+
+
+
+
+
+
+
+
